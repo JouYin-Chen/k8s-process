@@ -1,0 +1,10 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+commonLabels:
+  app: demo
+  environment: dev
+namespace: demo
+patches:
+  - target:
+      kind: ConfigMap
+    path: config-map.yaml

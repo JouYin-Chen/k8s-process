@@ -1,0 +1,56 @@
+name: CICD
+run-name: CICD process
+on:
+  push:
+    branches:
+      - "main"
+jobs:
+  deploy-dev:
+    permissions:
+      contents: read
+      id-token: write
+      actions: write
+    runs-on: ubuntu-latest
+    environment: dev
+    steps:
+      # ========================= Build section =========================
+      - name: Check out repository code
+        uses: actions/checkout@v3
+      # ========================= Deploy =========================
+      - id: auth
+        name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v1
+        with:
+          workload_identity_provider: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ vars.GCP_SA }}
+      - id: get-credentials
+        uses: google-github-actions/get-gke-credentials@v1
+        with:
+          cluster_name: ${{ vars.GKE_CLUSTER_NAME }}
+          location: ${{ vars.REGION }}
+      - name: Build & Push image
+        env:
+          MANIFEST_FOLDER: manifest/${{ vars.ENVIRONMENT }}
+          MANIFEST_REPO_FOLDER: k8s-process-manifest
+        run: |
+          curl -Lo skaffold https://storage.googleapis.com/skaffold/releases/latest/skaffold-linux-amd64
+          chmod +x skaffold
+          mv skaffold /usr/local/bin
+          skaffold version
+          gcloud auth configure-docker ${{ vars.ARTIFACT_REGISTRY }}
+          skaffold build --default-repo=${{ vars.ARTIFACT_REGISTRY }}/${{ vars.GCP_PROJECT_ID }} --filename=skaffold.yaml -p ${{ vars.ENVIRONMENT }}
+          skaffold render --default-repo=${{ vars.ARTIFACT_REGISTRY }}/${{ vars.GCP_PROJECT_ID }} --filename=skaffold.yaml -p ${{ vars.ENVIRONMENT }} -o $DEPLOYMENT_MANIFEST_FOLDER/manifest.yaml
+      - name: update manifest repo
+        env:
+          MANIFEST_FOLDER: manifest/${{ vars.ENVIRONMENT }}
+          MANIFEST_REPO_FOLDER: k8s-process-manifest
+        run: |
+          git config --global user.email "bot-eslite@eslite.com"
+          git config --global user.name "bot-eslite"
+          git config --global credential.helper cache
+          git clone https://${{secrets.GH_PAT}}@github.com/JouYin-Chen/k8s-process-manifest.git $MANIFEST_REPO_FOLDER
+          cp $MANIFEST_FOLDER/manifest.yaml $MANIFEST_REPO_FOLDER/${{ vars.ENVIRONMENT }}/. -rf
+          cd $MANIFEST_REPO_FOLDER
+          git add .
+          git commit -m "rendered: $GITHUB_SHA"
+          git push

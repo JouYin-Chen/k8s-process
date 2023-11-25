@@ -1,0 +1,20 @@
+{
+  "name": "k8s-process",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon index.js",
+    "start": "node index.js",
+    "build": "docker build -t k8s-process . --platform linux/amd64",
+    "docker_run": "docker run -d  --name k8s-process -p 3000:3000 k8s-process:latest"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "koa": "^2.14.2",
+    "koa-router": "^12.0.1",
+    "nodemon": "^3.0.1"
+  }
+}

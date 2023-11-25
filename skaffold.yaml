@@ -1,0 +1,34 @@
+apiVersion: skaffold/v4beta6
+kind: Config
+metadata:
+  name: demo
+build:
+  tagPolicy:
+    inputDigest: {}
+    # sha256: {}
+  artifacts:
+    - context: .
+      image: k8s/demo
+      docker:
+        dockerfile: Dockerfile
+  # local:
+  #   push: false
+deploy:
+  kubectl: {}
+  statusCheck: false
+profiles:
+  - name: dev
+    manifests:
+      kustomize:
+        paths:
+          - deloyment/overlays/development
+  - name: stg
+    manifests:
+      kustomize:
+        paths:
+          - deloyment/overlays/staging
+  - name: prd
+    manifests:
+      kustomize:
+        paths:
+          - deloyment/overlays/production

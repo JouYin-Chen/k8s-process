@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: demo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: demo
+  template:
+    metadata:
+      labels:
+        app: demo
+    spec:
+      containers:
+        - name: demo
+          image: k8s/demo
+          ports:
+            - containerPort: 3000
+          envFrom:
+            - configMapRef:
+                name: demo-config
+          resources:
+            requests:
+              cpu: 250m
+              ephemeral-storage: 50Mi
+              memory: 512Mi
+            limits:
+              cpu: 250m
+              ephemeral-storage: 50Mi
+              memory: 512Mi
