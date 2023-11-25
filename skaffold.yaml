@@ -21,14 +21,14 @@ profiles:
     manifests:
       kustomize:
         paths:
-          - deloyment/overlays/development
+          - deployment/overlays/development
   - name: stg
     manifests:
       kustomize:
         paths:
-          - deloyment/overlays/staging
+          - deployment/overlays/staging
   - name: prd
     manifests:
       kustomize:
         paths:
-          - deloyment/overlays/production
+          - deployment/overlays/production
