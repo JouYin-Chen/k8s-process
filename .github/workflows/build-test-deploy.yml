@@ -39,6 +39,7 @@ jobs:
           cluster_name: ${{ vars.GKE_CLUSTER_NAME }}
           location: ${{ vars.REGION }}
           credentials: ${{ vars.GCP_SA }}
+          project_id: ${{ vars.GCP_PROJECT_ID }}
       - name: Build & Push image
         env:
           MANIFEST_FOLDER: manifest/${{ vars.ENVIRONMENT }}
