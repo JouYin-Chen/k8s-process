@@ -17,23 +17,33 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@v3
       # ========================= Deploy =========================
-      - id: auth
-        name: Authenticate to Google Cloud
-        uses: google-github-actions/auth@v1
+      - uses: "actions/checkout@v3"
+      - id: "auth"
+        name: "Authenticate to Google Cloud"
+        uses: "google-github-actions/auth@v1"
         with:
+          token_format: access_token
+          access_token_lifetime: 600s
           workload_identity_provider: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ vars.GCP_SA }}
-      # - id: get-credentials
-      #   uses: google-github-actions/get-gke-credentials@v1
-      #   with:
-      #     cluster_name: ${{ vars.GKE_CLUSTER_NAME }}
-      #     location: ${{ vars.REGION }}
+      - name: Login to Artifact Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ${{ vars.ARTIFACT_REGISTRY }}
+          username: oauth2accesstoken
+          password: ${{ steps.auth.outputs.access_token }}
+      - name: Get the GKE credentials
+        id: "get-credentials"
+        uses: "google-github-actions/get-gke-credentials@v1"
+        with:
+          cluster_name: ${{ vars.GKE_CLUSTER_NAME }}
+          location: ${{ vars.REGION }}
+          credentials: ${{ vars.GCP_SA }}
       - name: Build & Push image
         env:
           MANIFEST_FOLDER: manifest/${{ vars.ENVIRONMENT }}
           MANIFEST_REPO_FOLDER: k8s-process-manifest
         run: |
-          gcloud container clusters get-credentials ${{ vars.GKE_CLUSTER_NAME }} --zone ${{ vars.REGION }} --project ${{ vars.GCP_PROJECT_ID }}
           curl -Lo skaffold https://storage.googleapis.com/skaffold/releases/latest/skaffold-linux-amd64
           chmod +x skaffold
           mv skaffold /usr/local/bin
