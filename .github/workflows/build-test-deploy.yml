@@ -32,37 +32,38 @@ jobs:
           registry: ${{ vars.ARTIFACT_REGISTRY }}
           username: oauth2accesstoken
           password: ${{ steps.auth.outputs.access_token }}
-      - name: Get the GKE credentials
-        id: "get-credentials"
-        uses: "google-github-actions/get-gke-credentials@v1"
-        with:
-          cluster_name: ${{ vars.GKE_CLUSTER_NAME }}
-          location: ${{ vars.REGION }}
-          credentials: ${{ vars.GCP_SA }}
-          project_id: ${{ vars.GCP_PROJECT_ID }}
-      - name: Build & Push image
-        env:
-          MANIFEST_FOLDER: manifest/${{ vars.ENVIRONMENT }}
-          MANIFEST_REPO_FOLDER: k8s-process-manifest
-        run: |
-          curl -Lo skaffold https://storage.googleapis.com/skaffold/releases/latest/skaffold-linux-amd64
-          chmod +x skaffold
-          mv skaffold /usr/local/bin
-          skaffold version
-          gcloud auth configure-docker ${{ vars.ARTIFACT_REGISTRY }}
-          skaffold build --default-repo=${{ vars.ARTIFACT_REGISTRY }}/${{ vars.GCP_PROJECT_ID }} --filename=skaffold.yaml -p ${{ vars.ENVIRONMENT }}
-          skaffold render --default-repo=${{ vars.ARTIFACT_REGISTRY }}/${{ vars.GCP_PROJECT_ID }} --filename=skaffold.yaml -p ${{ vars.ENVIRONMENT }} -o $DEPLOYMENT_MANIFEST_FOLDER/manifest.yaml
-      - name: update manifest repo
-        env:
-          MANIFEST_FOLDER: manifest/${{ vars.ENVIRONMENT }}
-          MANIFEST_REPO_FOLDER: k8s-process-manifest
-        run: |
-          git config --global user.email "bot-eslite@eslite.com"
-          git config --global user.name "bot-eslite"
-          git config --global credential.helper cache
-          git clone https://${{secrets.GH_PAT}}@github.com/JouYin-Chen/k8s-process-manifest.git $MANIFEST_REPO_FOLDER
-          cp $MANIFEST_FOLDER/manifest.yaml $MANIFEST_REPO_FOLDER/${{ vars.ENVIRONMENT }}/. -rf
-          cd $MANIFEST_REPO_FOLDER
-          git add .
-          git commit -m "rendered: $GITHUB_SHA"
-          git push
+      - name: Build
+        run: |-
+          docker build \
+          -f ./Dockerfile \
+          -t ${{ vars.ARTIFACT_REGISTRY }}/${{ vars.PROJECT_ID }}/k8s/demo:$GITHUB_SHA \
+          .
+          docker tag ${{ vars.ARTIFACT_REGISTRY }}/${{ vars.PROJECT_ID }}/k8s/demo:$GITHUB_SHA ${{ vars.ARTIFACT_REGISTRY }}/${{ vars.PROJECT_ID }}/k8s/demo:latest
+          docker push ${{ vars.ARTIFACT_REGISTRY }}/${{ vars.PROJECT_ID }}/k8s/demo:$GITHUB_SHA
+          docker push ${{ vars.ARTIFACT_REGISTRY }}/${{ vars.PROJECT_ID }}/k8s/demo:latest
+      # - name: Build & Push image
+      #   env:
+      #     MANIFEST_FOLDER: manifest/${{ vars.ENVIRONMENT }}
+      #     MANIFEST_REPO_FOLDER: k8s-process-manifest
+      #   run: |
+      #     curl -Lo skaffold https://storage.googleapis.com/skaffold/releases/latest/skaffold-linux-amd64
+      #     chmod +x skaffold
+      #     mv skaffold /usr/local/bin
+      #     skaffold version
+      #     gcloud auth configure-docker ${{ vars.ARTIFACT_REGISTRY }}
+      #     skaffold build --default-repo=${{ vars.ARTIFACT_REGISTRY }}/${{ vars.GCP_PROJECT_ID }} --filename=skaffold.yaml -p ${{ vars.ENVIRONMENT }}
+      #     skaffold render --default-repo=${{ vars.ARTIFACT_REGISTRY }}/${{ vars.GCP_PROJECT_ID }} --filename=skaffold.yaml -p ${{ vars.ENVIRONMENT }} -o $DEPLOYMENT_MANIFEST_FOLDER/manifest.yaml
+      # - name: update manifest repo
+      #   env:
+      #     MANIFEST_FOLDER: manifest/${{ vars.ENVIRONMENT }}
+      #     MANIFEST_REPO_FOLDER: k8s-process-manifest
+      #   run: |
+      #     git config --global user.email "bot-eslite@eslite.com"
+      #     git config --global user.name "bot-eslite"
+      #     git config --global credential.helper cache
+      #     git clone https://${{secrets.GH_PAT}}@github.com/JouYin-Chen/k8s-process-manifest.git $MANIFEST_REPO_FOLDER
+      #     cp $MANIFEST_FOLDER/manifest.yaml $MANIFEST_REPO_FOLDER/${{ vars.ENVIRONMENT }}/. -rf
+      #     cd $MANIFEST_REPO_FOLDER
+      #     git add .
+      #     git commit -m "rendered: $GITHUB_SHA"
+      #     git push
