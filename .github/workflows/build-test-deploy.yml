@@ -36,11 +36,11 @@ jobs:
         run: |-
           docker build \
           -f ./Dockerfile \
-          -t ${{ vars.ARTIFACT_REGISTRY }}/${{ vars.PROJECT_ID }}/k8s/demo:$GITHUB_SHA \
+          -t ${{ vars.ARTIFACT_REGISTRY }}/${{ vars.GCP_PROJECT_ID }}/k8s/demo:$GITHUB_SHA \
           .
-          docker tag ${{ vars.ARTIFACT_REGISTRY }}/${{ vars.PROJECT_ID }}/k8s/demo:$GITHUB_SHA ${{ vars.ARTIFACT_REGISTRY }}/${{ vars.PROJECT_ID }}/k8s/demo:latest
-          docker push ${{ vars.ARTIFACT_REGISTRY }}/${{ vars.PROJECT_ID }}/k8s/demo:$GITHUB_SHA
-          docker push ${{ vars.ARTIFACT_REGISTRY }}/${{ vars.PROJECT_ID }}/k8s/demo:latest
+          docker tag ${{ vars.ARTIFACT_REGISTRY }}/${{ vars.GCP_PROJECT_ID }}/k8s/demo:$GITHUB_SHA ${{ vars.ARTIFACT_REGISTRY }}/${{ vars.GCP_PROJECT_ID }}/k8s/demo:latest
+          docker push ${{ vars.ARTIFACT_REGISTRY }}/${{ vars.GCP_PROJECT_ID }}/k8s/demo:$GITHUB_SHA
+          docker push ${{ vars.ARTIFACT_REGISTRY }}/${{ vars.GCP_PROJECT_ID }}/k8s/demo:latest
       # - name: Build & Push image
       #   env:
       #     MANIFEST_FOLDER: manifest/${{ vars.ENVIRONMENT }}
