@@ -33,6 +33,7 @@ jobs:
           MANIFEST_FOLDER: manifest/${{ vars.ENVIRONMENT }}
           MANIFEST_REPO_FOLDER: k8s-process-manifest
         run: |
+          gcloud container clusters get-credentials ${{ vars.GKE_CLUSTER_NAME }} --zone ${{ vars.REGION }} --project ${{ vars.GCP_PROJECT_ID }}
           curl -Lo skaffold https://storage.googleapis.com/skaffold/releases/latest/skaffold-linux-amd64
           chmod +x skaffold
           mv skaffold /usr/local/bin
