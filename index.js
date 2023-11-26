@@ -4,9 +4,9 @@ const app = new Koa()
 const router = new Router()
 const config = require("./config")
 
-// for Healthy check
+// return 200
 router.get("/", async (ctx) => {
-  ctx.body = "ok. Healthy"
+  ctx.body = `Hello. I'm ${config.env}.`
   ctx.status = 200
 })
 
