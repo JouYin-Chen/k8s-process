@@ -3,6 +3,7 @@ kind: Kustomization
 commonLabels:
   app: demo
   environment: dev
+namePrefix: dev-
 namespace: demo
 resources:
   - ../../base
