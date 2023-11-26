@@ -9,7 +9,7 @@ on:
       - "rc/**"
 jobs:
   deploy-stg:
-    if: startsWith(github.ref, 'refs/heads/rc/*')
+    if: startsWith(github.ref, 'refs/heads/rc/')
     permissions:
       contents: read
       id-token: write
@@ -59,7 +59,7 @@ jobs:
           git commit -m "rendered: $GITHUB_SHA"
           git push
   deploy-prd:
-    if: startsWith(github.ref, 'refs/heads/release/*')
+    if: startsWith(github.ref, 'refs/heads/release/')
     permissions:
       contents: read
       id-token: write
