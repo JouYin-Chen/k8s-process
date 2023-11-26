@@ -1,0 +1,2 @@
+This folder contains the manifests for the development builds of the k8s deployment.
+The manifests are generated using the [skaffold](https://skaffold.dev/) with [kustomize](https://kustomize.io/) tool.

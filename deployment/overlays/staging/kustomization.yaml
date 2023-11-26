@@ -3,7 +3,10 @@ kind: Kustomization
 commonLabels:
   app: demo
   environment: stg
+namePrefix: stg-
 namespace: demo
+resources:
+  - ../../base
 patches:
   - target:
       kind: ConfigMap
